@@ -186,6 +186,9 @@ export const useLogsData = () => {
     useState(null);
   const [showParamOverrideModal, setShowParamOverrideModal] = useState(false);
   const [paramOverrideTarget, setParamOverrideTarget] = useState(null);
+  const [showRequestDetailModal, setShowRequestDetailModal] = useState(false);
+  const [requestDetailData, setRequestDetailData] = useState(null);
+  const [requestDetailLoading, setRequestDetailLoading] = useState(false);
 
   // Initialize default column visibility
   const initDefaultColumns = () => {
@@ -349,6 +352,23 @@ export const useLogsData = () => {
     });
     setShowChannelAffinityUsageCacheModal(true);
   };
+  const openRequestDetailModal = async (requestId) => {
+    setRequestDetailLoading(true);
+    setShowRequestDetailModal(true);
+    setRequestDetailData(null);
+    try {
+      const res = await API.get(`/api/log/request_detail?request_id=${requestId}`);
+      if (res.data.success) {
+        setRequestDetailData(res.data.data);
+      } else {
+        showError(res.data.message || t('查询请求详情失败'));
+      }
+    } catch (err) {
+      showError(t('查询请求详情失败'));
+    }
+    setRequestDetailLoading(false);
+  };
+
 
   const openParamOverrideModal = (log, other) => {
     const lines = Array.isArray(other?.po) ? other.po.filter(Boolean) : [];
@@ -392,7 +412,23 @@ export const useLogsData = () => {
       if (logs[i].request_id) {
         expandDataLocal.push({
           key: t('Request ID'),
-          value: logs[i].request_id,
+          value: (
+            <span>
+              {logs[i].request_id}
+              {' '}
+              <a
+                href='#'
+                style={{ marginLeft: 8, color: '#0070f3', textDecoration: 'none', fontSize: 12 }}
+                onClick={(e) => {
+                  e.preventDefault();
+                  e.stopPropagation();
+                  openRequestDetailModal(logs[i].request_id);
+                }}
+              >
+                📋 {t('查看请求/响应详情')}
+              </a>
+            </span>
+          ),
         });
       }
       if (other?.ws || other?.audio) {
@@ -881,6 +917,11 @@ export const useLogsData = () => {
     showParamOverrideModal,
     setShowParamOverrideModal,
     paramOverrideTarget,
+    // Request detail modal
+    showRequestDetailModal,
+    setShowRequestDetailModal,
+    requestDetailData,
+    requestDetailLoading,
 
     // Functions
     loadLogs,

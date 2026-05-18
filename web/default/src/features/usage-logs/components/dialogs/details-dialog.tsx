@@ -16,6 +16,7 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 
 For commercial licensing, please contact support@quantumnous.com
 */
+import { useState } from 'react'
 import {
   Copy,
   Check,
@@ -29,6 +30,7 @@ import {
   ShieldCheck,
   UserCog,
   Info,
+  FileText,
 } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
 import { formatBillingCurrencyFromUSD } from '@/lib/currency'
@@ -47,6 +49,7 @@ import { Label } from '@/components/ui/label'
 import { ScrollArea } from '@/components/ui/scroll-area'
 import { StatusBadge, type StatusBadgeProps } from '@/components/status-badge'
 import { DynamicPricingBreakdown } from '@/features/pricing/components/dynamic-pricing-breakdown'
+import { RequestDetailDialog } from './request-detail-dialog'
 import type { UsageLog } from '../../data/schema'
 import {
   parseLogOther,
@@ -401,6 +404,7 @@ interface DetailsDialogProps {
 export function DetailsDialog(props: DetailsDialogProps) {
   const { t } = useTranslation()
   const { copiedText, copyToClipboard } = useCopyToClipboard({ notify: false })
+  const [requestDetailOpen, setRequestDetailOpen] = useState(false)
   const details = props.log.content ?? ''
   const other = parseLogOther(props.log.other)
   const typeConfig = getLogTypeConfig(props.log.type)
@@ -518,6 +522,24 @@ export function DetailsDialog(props: DetailsDialogProps) {
                   value={props.log.request_id}
                   mono
                 />
+              )}
+              {props.log.request_id && (
+                <div className='flex items-center'>
+                  <Button
+                    variant='ghost'
+                    size='sm'
+                    className='text-primary h-6 gap-1 px-2 text-xs hover:underline'
+                    onClick={() => setRequestDetailOpen(true)}
+                  >
+                    <FileText className='size-3' />
+                    {t('View Request/Response Detail')}
+                  </Button>
+                  <RequestDetailDialog
+                    requestId={props.log.request_id}
+                    open={requestDetailOpen}
+                    onOpenChange={setRequestDetailOpen}
+                  />
+                </div>
               )}
               {props.log.upstream_request_id && (
                 <DetailRow

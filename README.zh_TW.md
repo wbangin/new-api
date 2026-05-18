@@ -254,6 +254,30 @@ docker run --name new-api -d --restart always \
 
 </details>
 
+**📋 Token 級請求/回應日誌記錄：**
+- 🔍 按 Token（API Key）維度控制是否記錄完整請求/回應內容
+- 📁 日誌存儲在本地 JSONL 檔案中，按日期自動分割（`{log-dir}/request_logs/YYYY-MM-DD.jsonl`）
+- 🔗 在「使用日誌」詳情中可直接點擊查看完整請求體和回應體
+- ⚡ 非同步寫入，不影響請求處理效能
+- 🛡️ 權限控制：管理員可查看所有日誌，普通使用者僅可查看自己 Token 的日誌
+
+<details>
+<summary>使用方法</summary>
+
+1. 在令牌管理頁面編輯 Token，開啟 **「記錄請求內容」** 開關
+2. 使用該 Token 發送請求後，在「使用日誌」中展開日誌詳情
+3. 點擊 Request ID 旁邊的 **「📋 查看請求/回應詳情」** 連結查看完整內容
+
+**日誌檔案位置：** `--log-dir` 參數指定目錄下的 `request_logs/` 子目錄（預設 `./logs/request_logs/`）
+
+**清理建議：** 配合 cron 定期清理舊日誌檔案
+```bash
+# 保留最近 30 天
+0 2 * * * find /path/to/logs/request_logs/ -name "*.jsonl" -mtime +30 -delete
+```
+
+</details>
+
 ---
 
 ## 🤖 模型支援

@@ -254,6 +254,30 @@ docker run --name new-api -d --restart always \
 
 </details>
 
+**📋 Journalisation des requêtes/réponses par Token :**
+- 🔍 Contrôle par Token (clé API) de l'enregistrement complet des requêtes/réponses
+- 📁 Logs stockés dans des fichiers JSONL locaux, divisés automatiquement par date (`{log-dir}/request_logs/YYYY-MM-DD.jsonl`)
+- 🔗 Consultation directe du corps complet des requêtes et réponses depuis les détails des "Logs d'utilisation"
+- ⚡ Écriture asynchrone, aucun impact sur les performances de traitement des requêtes
+- 🛡️ Contrôle des permissions : les administrateurs peuvent voir tous les logs, les utilisateurs réguliers uniquement ceux de leurs propres Tokens
+
+<details>
+<summary>Utilisation</summary>
+
+1. Éditez un Token dans la page de gestion des Tokens, activez le commutateur **"Enregistrer le contenu des requêtes"**
+2. Après avoir envoyé des requêtes avec ce Token, développez les détails du log dans "Logs d'utilisation"
+3. Cliquez sur le lien **"📋 Voir les détails requête/réponse"** à côté du Request ID
+
+**Emplacement des fichiers de log :** sous-répertoire `request_logs/` dans le répertoire spécifié par `--log-dir` (par défaut `./logs/request_logs/`)
+
+**Recommandation de nettoyage :** utilisez cron pour nettoyer périodiquement les anciens fichiers de log
+```bash
+# Conserver les 30 derniers jours
+0 2 * * * find /path/to/logs/request_logs/ -name "*.jsonl" -mtime +30 -delete
+```
+
+</details>
+
 ---
 
 ## 🤖 Prise en charge des modèles

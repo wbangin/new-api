@@ -81,6 +81,7 @@ const EditTokenModal = (props) => {
     allow_ips: '',
     group: '',
     cross_group_retry: false,
+    log_request_enabled: false,
     tokenCount: 1,
   });
 
@@ -638,6 +639,16 @@ const EditTokenModal = (props) => {
                       )}
                       showClear
                       style={{ width: '100%' }}
+                    />
+                  </Col>
+                  <Col span={24}>
+                    <Form.Switch
+                      field='log_request_enabled'
+                      label={t('记录请求内容')}
+                      size='default'
+                      extraText={t(
+                        '开启后，该令牌的完整请求和响应内容将被记录到本地日志文件，用于调试排查',
+                      )}
                     />
                   </Col>
                 </Row>

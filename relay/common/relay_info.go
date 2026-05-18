@@ -147,6 +147,8 @@ type RelayInfo struct {
 	SubscriptionAmountUsedAfterPreConsume int64
 	IsClaudeBetaQuery                     bool // /v1/messages?beta=true
 	IsChannelTest                         bool // channel test request
+	LogRequestEnabled                     bool // 是否记录请求/响应内容（由 Token 配置控制）
+	ResponseBody                          []byte // 用于记录非流式响应体
 	RetryIndex                            int
 	LastError                             *types.NewAPIError
 	RuntimeHeadersOverride                map[string]interface{}
@@ -464,10 +466,11 @@ func genBaseRelayInfo(c *gin.Context, request dto.Request) *RelayInfo {
 
 		OriginModelName: common.GetContextKeyString(c, constant.ContextKeyOriginalModel),
 
-		TokenId:        common.GetContextKeyInt(c, constant.ContextKeyTokenId),
-		TokenKey:       common.GetContextKeyString(c, constant.ContextKeyTokenKey),
-		TokenUnlimited: common.GetContextKeyBool(c, constant.ContextKeyTokenUnlimited),
-		TokenGroup:     tokenGroup,
+		TokenId:           common.GetContextKeyInt(c, constant.ContextKeyTokenId),
+		TokenKey:          common.GetContextKeyString(c, constant.ContextKeyTokenKey),
+		TokenUnlimited:    common.GetContextKeyBool(c, constant.ContextKeyTokenUnlimited),
+		TokenGroup:        tokenGroup,
+		LogRequestEnabled: c.GetBool("token_log_request_enabled"),
 
 		isFirstResponse: true,
 		RelayMode:       relayconstant.Path2RelayMode(c.Request.URL.Path),

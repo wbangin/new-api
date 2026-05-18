@@ -222,6 +222,33 @@ func Relay(c *gin.Context, relayFormat types.RelayFormat) {
 
 		if newAPIError == nil {
 			relayInfo.LastError = nil
+			// 异步记录请求/响应日志（仅当 Token 开启了记录功能时）
+			if relayInfo.LogRequestEnabled {
+				var requestBodyStr string
+				if bs, bErr := common.GetBodyStorage(c); bErr == nil {
+					if bodyBytes, rErr := bs.Bytes(); rErr == nil {
+						requestBodyStr = string(bodyBytes)
+					}
+				}
+				tokenName := c.GetString("token_name")
+				responseBody := string(relayInfo.ResponseBody)
+				gopool.Go(func() {
+					entry := &service.RequestLogEntry{
+						RequestId:    relayInfo.RequestId,
+						Timestamp:    relayInfo.StartTime.Unix(),
+						TokenId:      relayInfo.TokenId,
+						TokenName:    tokenName,
+						UserId:       relayInfo.UserId,
+						Model:        relayInfo.OriginModelName,
+						RelayMode:    relayInfo.RelayMode,
+						RequestBody:  requestBodyStr,
+						ResponseBody: responseBody,
+						StatusCode:   200,
+						IsStream:     relayInfo.IsStream,
+					}
+					service.WriteRequestLog(entry)
+				})
+			}
 			return
 		}
 

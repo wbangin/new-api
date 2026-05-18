@@ -248,6 +248,30 @@ docker run --name new-api -d --restart always \
 
 </details>
 
+**📋 Token-level Request/Response Logging:**
+- 🔍 Control per-Token (API Key) whether to log full request/response content
+- 📁 Logs stored in local JSONL files, auto-split by date (`{log-dir}/request_logs/YYYY-MM-DD.jsonl`)
+- 🔗 View full request and response body directly from "Usage Logs" details
+- ⚡ Async writing, no impact on request processing performance
+- 🛡️ Permission control: admins can view all logs, regular users can only view their own Token logs
+
+<details>
+<summary>Usage</summary>
+
+1. Edit a Token in the Token Management page, enable the **"Log Request Content"** switch
+2. After sending requests with that Token, expand log details in "Usage Logs"
+3. Click the **"📋 View Request/Response Detail"** link next to the Request ID
+
+**Log file location:** `request_logs/` subdirectory under the `--log-dir` parameter (default `./logs/request_logs/`)
+
+**Cleanup recommendation:** Use cron to periodically clean old log files
+```bash
+# Keep last 30 days
+0 2 * * * find /path/to/logs/request_logs/ -name "*.jsonl" -mtime +30 -delete
+```
+
+</details>
+
 ---
 
 ## 🤖 Model Support

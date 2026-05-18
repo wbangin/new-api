@@ -256,6 +256,30 @@ docker run --name new-api -d --restart always \
 
 </details>
 
+**📋 Token単位のリクエスト/レスポンスログ記録：**
+- 🔍 Token（APIキー）単位でリクエスト/レスポンス内容の完全記録を制御
+- 📁 ログはローカルJSONLファイルに保存、日付ごとに自動分割（`{log-dir}/request_logs/YYYY-MM-DD.jsonl`）
+- 🔗 「使用ログ」詳細からリクエスト本文とレスポンス本文を直接確認可能
+- ⚡ 非同期書き込み、リクエスト処理のパフォーマンスに影響なし
+- 🛡️ 権限制御：管理者は全ログ閲覧可、一般ユーザーは自分のTokenのログのみ閲覧可
+
+<details>
+<summary>使用方法</summary>
+
+1. トークン管理ページでTokenを編集し、**「リクエスト内容を記録」** スイッチを有効にする
+2. そのTokenでリクエストを送信後、「使用ログ」でログ詳細を展開
+3. Request ID横の **「📋 リクエスト/レスポンス詳細を表示」** リンクをクリック
+
+**ログファイルの場所：** `--log-dir` パラメータで指定したディレクトリ内の `request_logs/` サブディレクトリ（デフォルト `./logs/request_logs/`）
+
+**クリーンアップの推奨：** cronで古いログファイルを定期的に削除
+```bash
+# 直近30日間を保持
+0 2 * * * find /path/to/logs/request_logs/ -name "*.jsonl" -mtime +30 -delete
+```
+
+</details>
+
 ---
 
 ## 🤖 モデルサポート

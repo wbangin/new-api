@@ -592,6 +592,31 @@ export function ApiKeysMutateDrawer({
                         </FormItem>
                       )}
                     />
+
+                    <FormField
+                      control={form.control}
+                      name='log_request_enabled'
+                      render={({ field }) => (
+                        <FormItem className='flex min-h-16 flex-row items-center justify-between gap-3 rounded-lg border px-3 py-2.5 sm:min-h-20 sm:gap-4 sm:px-4 sm:py-3'>
+                          <div className='space-y-0.5'>
+                            <FormLabel className='text-sm'>
+                              {t('Log Request Content')}
+                            </FormLabel>
+                            <FormDescription className='line-clamp-2 text-xs sm:line-clamp-none'>
+                              {t(
+                                'When enabled, full request and response content will be logged to local files for debugging.'
+                              )}
+                            </FormDescription>
+                          </div>
+                          <FormControl>
+                            <Switch
+                              checked={!!field.value}
+                              onCheckedChange={field.onChange}
+                            />
+                          </FormControl>
+                        </FormItem>
+                      )}
+                    />
                   </div>
                 </CollapsibleContent>
               </section>

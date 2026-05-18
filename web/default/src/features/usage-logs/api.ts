@@ -109,3 +109,30 @@ export const getAllTaskLogs = (params: GetTaskLogsParams) =>
 
 export const getUserTaskLogs = (params: GetTaskLogsParams) =>
   fetchLogs('/api/task', params, false)
+
+// ============================================================================
+// Request Detail API
+// ============================================================================
+
+export interface RequestDetailEntry {
+  request_id: string
+  timestamp: number
+  token_id: number
+  token_name: string
+  user_id: number
+  model: string
+  relay_mode: number
+  request_body: string
+  response_body: string
+  status_code: number
+  is_stream: boolean
+}
+
+export async function getRequestDetail(
+  requestId: string
+): Promise<{ success: boolean; message?: string; data?: RequestDetailEntry }> {
+  const res = await api.get(
+    `/api/log/request_detail?request_id=${encodeURIComponent(requestId)}`
+  )
+  return res.data
+}
