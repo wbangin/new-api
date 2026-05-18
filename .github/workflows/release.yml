@@ -178,3 +178,99 @@ jobs:
             checksums-windows.txt
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+  appimage:
+    name: AppImage Release
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
+        with:
+          fetch-depth: 0
+      - name: Determine Version
+        run: |
+          VERSION=$(git describe --tags)
+          echo "VERSION=$VERSION" >> $GITHUB_ENV
+      - uses: oven-sh/setup-bun@0c5077e51419868618aeaa5fe8019c62421857d6 # v2
+        with:
+          bun-version: latest
+      - name: Build Frontend (default)
+        env:
+          CI: ""
+        run: |
+          cd web/default
+          bun install
+          DISABLE_ESLINT_PLUGIN='true' VITE_REACT_APP_VERSION=$VERSION bun run build
+          cd ../..
+      - name: Build Frontend (classic)
+        env:
+          CI: ""
+        run: |
+          cd web/classic
+          bun install
+          VITE_REACT_APP_VERSION=$VERSION bun run build
+          cd ../..
+      - name: Set up Go
+        uses: actions/setup-go@40f1582b2485089dde7abd97c1529aa768e1baff # v5
+        with:
+          go-version: '>=1.25.1'
+      - name: Install cross-compilation tools
+        run: |
+          sudo apt-get update
+          DEBIAN_FRONTEND=noninteractive sudo apt-get install -y gcc-aarch64-linux-gnu file
+      - name: Download appimagetool
+        run: |
+          wget -q "https://github.com/AppImage/appimagetool/releases/download/continuous/appimagetool-x86_64.AppImage" -O appimagetool
+          chmod +x appimagetool
+
+      - name: Build AppImage (x86_64)
+        run: |
+          go mod download
+          CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -ldflags "-s -w -X 'new-api/common.Version=$VERSION'" -o new-api-bin
+
+          # Create AppDir structure
+          mkdir -p AppDir/usr/bin
+          cp new-api-bin AppDir/usr/bin/new-api
+          cp appimage/AppRun AppDir/AppRun
+          chmod +x AppDir/AppRun
+          cp appimage/new-api.desktop AppDir/new-api.desktop
+          cp web/default/public/logo.png AppDir/new-api.png
+
+          # Build AppImage
+          ARCH=x86_64 ./appimagetool --no-appstream AppDir new-api-$VERSION-x86_64.AppImage
+          chmod +x new-api-$VERSION-x86_64.AppImage
+
+          # Cleanup
+          rm -rf AppDir new-api-bin
+
+      - name: Build AppImage (aarch64)
+        run: |
+          CC=aarch64-linux-gnu-gcc CGO_ENABLED=0 GOOS=linux GOARCH=arm64 go build -ldflags "-s -w -X 'new-api/common.Version=$VERSION'" -o new-api-bin
+
+          # Create AppDir structure
+          mkdir -p AppDir/usr/bin
+          cp new-api-bin AppDir/usr/bin/new-api
+          cp appimage/AppRun AppDir/AppRun
+          chmod +x AppDir/AppRun
+          cp appimage/new-api.desktop AppDir/new-api.desktop
+          cp web/default/public/logo.png AppDir/new-api.png
+
+          # Build AppImage (use x86_64 appimagetool but target aarch64)
+          ARCH=aarch64 ./appimagetool --no-appstream AppDir new-api-$VERSION-aarch64.AppImage
+          chmod +x new-api-$VERSION-aarch64.AppImage
+
+          # Cleanup
+          rm -rf AppDir new-api-bin
+
+      - name: Generate checksums
+        run: sha256sum new-api-*.AppImage > checksums-appimage.txt
+
+      - name: Release
+        uses: softprops/action-gh-release@153bb8e04406b158c6c84fc1615b65b24149a1fe # v2
+        if: startsWith(github.ref, 'refs/tags/')
+        with:
+          files: |
+            new-api-*.AppImage
+            checksums-appimage.txt
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

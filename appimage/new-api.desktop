@@ -1,0 +1,8 @@
+[Desktop Entry]
+Name=New API
+Comment=AI API Gateway/Proxy
+Exec=new-api
+Icon=new-api
+Type=Application
+Categories=Network;WebDevelopment;
+Terminal=true
