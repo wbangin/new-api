@@ -15,6 +15,7 @@ import (
 )
 
 var (
+	Host         = flag.String("host", "", "the listening host/IP address, empty means all interfaces (0.0.0.0)")
 	Port         = flag.Int("port", 3000, "the listening port")
 	PrintVersion = flag.Bool("version", false, "print version and exit")
 	PrintHelp    = flag.Bool("help", false, "print help and exit")
@@ -25,7 +26,7 @@ func printHelp() {
 	fmt.Println("NewAPI(Based OneAPI) " + Version + " - The next-generation LLM gateway and AI asset management system supports multiple languages.")
 	fmt.Println("Original Project: OneAPI by JustSong - https://github.com/songquanpeng/one-api")
 	fmt.Println("Maintainer: QuantumNous - https://github.com/QuantumNous/new-api")
-	fmt.Println("Usage: newapi [--port <port>] [--log-dir <log directory>] [--version] [--help]")
+	fmt.Println("Usage: newapi [--host <host>] [--port <port>] [--log-dir <log directory>] [--version] [--help]")
 }
 
 func InitEnv() {
@@ -63,6 +64,9 @@ func InitEnv() {
 	}
 	if os.Getenv("SQLITE_PATH") != "" {
 		SQLitePath = os.Getenv("SQLITE_PATH")
+	}
+	if os.Getenv("HOST") != "" {
+		*Host = os.Getenv("HOST")
 	}
 	if *LogDir != "" {
 		var err error

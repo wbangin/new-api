@@ -204,7 +204,8 @@ func main() {
 	// Log startup success message
 	common.LogStartupSuccess(startTime, port)
 
-	err = server.Run(":" + port)
+	listenAddr := fmt.Sprintf("%s:%s", *common.Host, port)
+	err = server.Run(listenAddr)
 	if err != nil {
 		common.FatalLog("failed to start HTTP server: " + err.Error())
 	}
